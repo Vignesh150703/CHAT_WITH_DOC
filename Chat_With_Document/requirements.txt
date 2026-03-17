@@ -13,3 +13,4 @@ streamlit
 python-dotenv
 sentence-transformers
 spacy
+

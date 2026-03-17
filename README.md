@@ -41,9 +41,20 @@ It supports document-wise filtering (per uploaded file), semantic-ish chunking, 
 
 ## Repository structure
 
-- `pinecone/app.py`: Streamlit application (indexing + retrieval + chat).
-- `pinecone/requirements.txt`: Python dependencies for the app.
-- `pinecone/doc_catalog.json`: Persistent list of document names for the dropdown (auto-generated).
+- `Chat_With_Document/app.py`: Streamlit entrypoint (runs the UI).
+- `Chat_With_Document/ui.py`: Streamlit UI + session state + upload/chat flows.
+- `Chat_With_Document/qa.py`: Orchestrates retrieval + prompting + Groq call.
+- `Chat_With_Document/retrieval.py`: Pinecone retrieval + dedupe + reranking + context formatting.
+- `Chat_With_Document/prompts.py`: System/user prompts for grounded answers with evidence.
+- `Chat_With_Document/chunking.py`: Sentence-based chunking (spaCy) with fallback splitter.
+- `Chat_With_Document/loaders.py`: File loading (PDF/DOCX/TXT/Unstructured) + metadata.
+- `Chat_With_Document/indexing.py`: Deterministic IDs + dedup upsert to Pinecone.
+- `Chat_With_Document/pinecone_client.py`: Pinecone index create/connect logic.
+- `Chat_With_Document/caching.py`: Cached resources (embeddings, reranker, spaCy, tokenizer, Groq client).
+- `Chat_With_Document/text_utils.py`: Hashing, keyword score, token counting.
+- `Chat_With_Document/config.py`: Central configuration/constants and env validation.
+- `Chat_With_Document/requirements.txt`: Python dependencies for the app.
+- `Chat_With_Document/doc_catalog.json`: Persistent list of document names for the dropdown (auto-generated).
 - `.env`: Environment variables (you create locally; do not commit secrets).
 
 ---
@@ -60,7 +71,7 @@ python -m venv venv
 ### 2) Install dependencies
 
 ```powershell
-pip install -r .\pinecone\requirements.txt
+pip install -r .\Chat_With_Document\requirements.txt
 ```
 
 ### 3) Install spaCy model (required for sentence-based chunking)
@@ -87,7 +98,7 @@ GROQ_API_KEY="YOUR_GROQ_KEY"
 From the project root:
 
 ```powershell
-streamlit run .\pinecone\app.py
+streamlit run .\Chat_With_Document\app.py
 ```
 
 Open the displayed local URL in your browser.
@@ -106,7 +117,7 @@ Open the displayed local URL in your browser.
    - Chunks content using **spaCy sentence segmentation** into ~4k-character chunks with overlap.
    - Embeds chunks using MPNet (`all-mpnet-base-v2`).
    - Upserts vectors into Pinecone under namespace **`global`** with deterministic IDs (dedupe).
-4. Document names are stored in `pinecone/doc_catalog.json` to populate the dropdown next run.
+4. Document names are stored in `Chat_With_Document/doc_catalog.json` to populate the dropdown next run.
 
 ### Query flow (Question → Answer)
 
@@ -128,14 +139,14 @@ Open the displayed local URL in your browser.
 
 ## Configuration knobs (in code)
 
-In `pinecone/app.py`:
+In `Chat_With_Document/` modules:
 
 - **Retrieval defaults**:
   - `DENSE_K_DEFAULT`: how many vectors to fetch from Pinecone per query
   - `FINAL_K_DEFAULT`: how many reranked chunks to pass to the LLM
   - `RERANK_CANDIDATES_MAX`: how many candidates are reranked
 - **Context budget**:
-  - `format_cited_context(..., max_context_tokens=3400)`
+  - `MAX_CONTEXT_TOKENS` (see `Chat_With_Document/config.py`)
 - **Chunking**:
   - spaCy-based chunking uses `max_chars = 4000` and `overlap_sents = 2`
 
@@ -172,7 +183,7 @@ Important:
 
 ### Document filter dropdown only shows “All documents”
 
-The dropdown list comes from `pinecone/doc_catalog.json` (written when you process uploads).  
+The dropdown list comes from `Chat_With_Document/doc_catalog.json` (written when you process uploads).  
 If you haven’t processed documents in this workspace yet, the list will be empty.
 
 ---
@@ -180,7 +191,7 @@ If you haven’t processed documents in this workspace yet, the list will be emp
 ## Security notes
 
 - Do **not** commit `.env` files or API keys.
-- Consider removing any hard-coded fallback keys from `pinecone/app.py` if present in your environment.
+- Avoid hard-coding API keys in code; use `.env` only.
 
 ---
 

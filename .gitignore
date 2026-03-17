@@ -21,5 +21,5 @@ venv/
 Thumbs.db
 
 ## App-generated artifacts
-pinecone/doc_catalog.json
+Chat_With_Document/doc_catalog.json
 
