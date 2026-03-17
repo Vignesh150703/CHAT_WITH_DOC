@@ -23,3 +23,6 @@ Thumbs.db
 ## App-generated artifacts
 Chat_With_Document/doc_catalog.json
 
+## Local data (do not commit PDFs/videos)
+Data/
+
