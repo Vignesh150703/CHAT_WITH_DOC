@@ -1,3 +1,6 @@
+# Demo Video for Chat With Documents Application
+https://github.com/user-attachments/assets/899b0183-6fab-4b15-8548-b7dd7ee693cc
+
 # Vector DB RAG Chat (Pinecone + Groq + Streamlit)
 
 Streamlit app to upload documents, index them into **Pinecone**, and chat with them using **Groq** (RAG: Retrieval-Augmented Generation).  
